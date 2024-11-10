@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Inventory</title>
+    <style>
+        /* Global Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            padding: 20px;
+            background-color: #1c1c1c;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
+        }
+        .page {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        /* Input and Button Styles */
+        .input-box, .field-option, .template-option {
+            width: 90%;
+            padding: 10px;
+            font-size: 1rem;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .input-box::placeholder {
+            color: #bbb;
+        }
+        .field-option:hover, .template-option:hover,
+        .field-option.selected, .template-option.selected {
+            background-color: #555;
+            transform: scale(1.03);
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: grey;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .button:hover {
+            background-color: #555;
+            transform: scale(1.03);
+        }
+        .back-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: grey;
+            font-size: 1.2rem;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        /* Chat Bot Page Styles */
+        .chat-bot-header {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .chat-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .chat-button {
+            width: 45%;
+            padding: 10px;
+            background-color: #444;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .chat-button:hover {
+            background-color: #666;
+            transform: scale(1.03);
+        }
+        .chat-interface {
+            width: 100%;
+            padding: 10px;
+            height: 200px;
+            background-color: #333;
+            border-radius: 5px;
+            overflow-y: auto;
+            text-align: left;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+        .prompt-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+            background-color: #333;
+            color: white;
+            outline: none;
+        }
+        /* Accept/Reject Popup */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            color: white;
+            text-align: center;
+            z-index: 1000;
+        }
+        .popup-content {
+            background-color: #1c1c1c;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+        }
+        .popup button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #444;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .popup button:hover {
+            background-color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Page 1: Enter Your Details -->
+    <div id="page1" class="page active">
+        <h2>Enter Your Details</h2>
+        <input type="text" placeholder="Name" class="input-box">
+        <input type="text" placeholder="Contact No" class="input-box">
+        <input type="text" placeholder="GSTIN" class="input-box">
+        <button class="button" onclick="nextPage(2)">Next</button>
+    </div>
+
+    <!-- Page 2: Select Business Field -->
+    <div id="page2" class="page">
+        <h2>Select Your Business Field</h2>
+        <button class="field-option" onclick="selectOption(this, 3)">Medicine</button>
+        <button class="field-option" onclick="selectOption(this, 3)">Clothes</button>
+        <button class="field-option" onclick="selectOption(this, 3)">Grocery</button>
+        <button class="field-option" onclick="selectOption(this, 3)">Departmental Store</button>
+        <button class="field-option" onclick="selectOption(this, 3)">Other</button>
+    </div>
+
+    <!-- Page 3: Select Business Template -->
+    <div id="page3" class="page">
+        <h2>Select Business Template</h2>
+        <div class="template-option" onclick="showPopup(this)">Option 1 - Product name, product price, product quantity</div>
+        <div class="template-option" onclick="showPopup(this)">Option 2 - Service name, service rate, service duration</div>
+        <div class="template-option" onclick="showPopup(this)">Option 3 - Product code, description, unit cost</div>
+        <div class="template-option" onclick="showPopup(this)">Option 4 - Item ID, category, stock quantity</div>
+    </div>
+
+    <!-- Page 4: Chat Bot Interface -->
+    <div id="page4" class="page">
+        <div class="chat-bot-header">Welcome to Smart Inventory</div>
+        <div class="chat-options">
+            <button class="chat-button">Data Record</button>
+            <button class="chat-button">Data Insight</button>
+        </div>
+        <div class="chat-interface">
+            <p><strong>ChatBot:</strong> Hello! How can I assist you today?</p>
+        </div>
+        <input type="text" class="prompt-input" placeholder="Type your message...">
+    </div>
+
+    <!-- Popup for Accept/Reject -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <p>Do you want to accept this template?</p>
+            <button onclick="acceptTemplate()">Accept</button>
+            <button onclick="closePopup()">Reject</button>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="back-link" onclick="goBack()">Back</div>
+</div>
+
+<script>
+    let currentPage = 1;
+
+    function nextPage(pageNumber) {
+        document.getElementById(`page${currentPage}`).classList.remove('active');
+        currentPage = pageNumber;
+        document.getElementById(`page${currentPage}`).classList.add('active');
+    }
+
+    function selectOption(element, nextPageNumber) {
+        document.querySelectorAll('.field-option').forEach(btn => btn.classList.remove('selected'));
+        element.classList.add('selected');
+        setTimeout(() => nextPage(nextPageNumber), 300);
+    }
+
+    function showPopup(element) {
+        document.getElementById('popup').style.display = 'flex';
+    }
+
+    function acceptTemplate() {
+        closePopup();
+        nextPage(4);
+    }
+
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+    }
+
+    function goBack() {
+        if (currentPage > 1) {
+            nextPage(currentPage - 1);
+        }
+    }
+</script>
+
+</body>
+</html>
